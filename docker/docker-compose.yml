@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  postgres-dwh:
+    image: postgres:15
+    container_name: transport_postgres
+    environment:
+      POSTGRES_USER: etl_user3
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: dwh_etl_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etl_user3"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-airflow:
+    image: postgres:13
+    container_name: airflow_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: transport_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  airflow-init:
+    image: apache/airflow:2.7.1-python3.9
+    container_name: transport_airflow_init
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+    volumes:
+      - ../dags:/opt/airflow/dags
+      - /mnt/c/DTPresource/data:/opt/airflow/data
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+    command: >
+      bash -c "
+        pip install pandas numpy psycopg2-binary sqlalchemy requests &&
+        airflow db init &&
+        airflow users create --username airflow --password airflow --firstname Airflow --lastname Admin --role Admin --email admin@airflow.com
+      "
+    restart: "no"
+
+  airflow:
+    image: apache/airflow:2.7.1-python3.9
+    container_name: transport_airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__CORE__FERNET_KEY: "46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho="
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../dags:/opt/airflow/dags
+      - ../logs:/opt/airflow/logs
+      - /mnt/c/DTPresource/data:/opt/airflow/data
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    command: >
+      bash -c "
+        airflow webserver -p 8080 & airflow scheduler
+      "
+    restart: unless-stopped
+
+  superset:
+    image: apache/superset:4.0.0
+    container_name: transport_superset
+    environment:
+      SUPERSET_SECRET_KEY: secret_key
+    ports:
+      - "8088:8088"
+    command: >
+      bash -c "
+        superset fab create-admin --username admin --password admin --firstname Admin --lastname User --email admin@superset.com 2>/dev/null || true &&
+        superset db upgrade &&
+        superset init &&
+        superset run -p 8088 --with-threads
+      "
+    depends_on:
+      - postgres-dwh
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  airflow_postgres_data:

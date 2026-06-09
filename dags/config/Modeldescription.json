@@ -1,0 +1,18 @@
+{
+  "source_path": "/opt/airflow/data",
+  "encoding": "utf-8",
+  "datasets": [
+    {
+      "name": "accidents",
+      "filename": "accidents_all_regions_126_v20260501.csv"
+    },
+    {
+      "name": "participants",
+      "filename": "participants_all_regions_126_v20260501.csv"
+    },
+    {
+      "name": "vehicles",
+      "filename": "vehicles_all_regions_126_v20260501.csv"
+    }
+  ]
+}
