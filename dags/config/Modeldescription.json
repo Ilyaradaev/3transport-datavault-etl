@@ -1,18 +1,27 @@
 {
   "source_path": "/opt/airflow/data",
   "encoding": "utf-8",
+  "defaults": {
+    "delimiter": ",",
+    "skip_bad_lines": true,
+    "chunk_size": 5000,
+    "expected_columns": 0
+  },
   "datasets": [
     {
       "name": "accidents",
-      "filename": "accidents_all_regions_126_v20260501.csv"
+      "filename": "accidents_all_regions_126_v20260501.csv",
+      "skip_bad_lines": true
     },
     {
       "name": "participants",
-      "filename": "participants_all_regions_126_v20260501.csv"
+      "filename": "participants_all_regions_126_v20260501.csv",
+      "skip_bad_lines": true
     },
     {
       "name": "vehicles",
-      "filename": "vehicles_all_regions_126_v20260501.csv"
+      "filename": "vehicles_all_regions_126_v20260501.csv",
+      "skip_bad_lines": true
     }
   ]
 }
