@@ -91,6 +91,8 @@ for: 3transport-datavault-etl
 ## 2. АРХИТЕКТУРА РЕШЕНИЯ
 
 ### 2.1. Общая архитектура системы
+<img width="1780" height="688" alt="image" src="https://github.com/user-attachments/assets/a697946d-4e81-40c1-8143-dc002b773127" />
+
 
 Система построена по принципу **слоистой архитектуры** (Layered Architecture), что обеспечивает разделение ответственности и упрощает масштабирование.
 
