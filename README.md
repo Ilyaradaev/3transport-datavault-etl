@@ -10,9 +10,13 @@ for: 3transport-datavault-etl
 # 📄 Документация к заданию №1: ETL-пайплайн транспортной аналитики (Data Vault)
 
 **Автор:** Радаев Илья Владимирович   
+
 **Группа:** 16540 ФДО
+
 **Дисциплина:** Data Architecture  
-**Репозиторий:** `3transport-datavault-etl`  
+
+**Репозиторий:** `3transport-datavault-etl` 
+
 **Дата:** 14 июня 2024 г.
 
 ---
