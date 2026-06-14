@@ -196,7 +196,7 @@ CREATE TABLE datavault.hub_vehicle (
 Индексы:
 CREATE INDEX idx_hub_vehicle_bk ON datavault.hub_vehicle(vehicle_id);
 
-####hub_region
+#### hub_region
 
 ```sql
 CREATE TABLE datavault.hub_region (
@@ -211,5 +211,152 @@ CREATE TABLE datavault.hub_region (
 
 Индексы:
 CREATE INDEX idx_hub_region_bk ON datavault.hub_region(region_name);
+
+### 3.3. LINK таблицы (связи)
+#### link_accident_participant
+
+```sql
+CREATE TABLE datavault.link_accident_participant (
+   link_hashkey VARCHAR(32) PRIMARY KEY,
+   hub_accident_hashkey VARCHAR(32),
+   hub_participant_hashkey VARCHAR(32),
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50),
+   FOREIGN KEY (hub_accident_hashkey) REFERENCES hub_accident(hub_accident_hashkey),
+   FOREIGN KEY (hub_participant_hashkey) REFERENCES hub_participant(hub_participant_hashkey)
+);
+```
+
+Связь: accident ↔ participant (многие-ко-многим)
+
+Индексы:
+CREATE INDEX idx_link_acc_participant_acc ON datavault.link_accident_participant(hub_accident_hashkey);
+CREATE INDEX idx_link_acc_participant_part ON datavault.link_accident_participant(hub_participant_hashkey);
+
+#### link_accident_vehicle
+
+```sql
+CREATE TABLE datavault.link_accident_vehicle (
+   link_hashkey VARCHAR(32) PRIMARY KEY,
+   hub_accident_hashkey VARCHAR(32),
+   hub_vehicle_hashkey VARCHAR(32),
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50),
+   FOREIGN KEY (hub_accident_hashkey) REFERENCES hub_accident(hub_accident_hashkey),
+   FOREIGN KEY (hub_vehicle_hashkey) REFERENCES hub_vehicle(hub_vehicle_hashkey)
+);
+```
+
+Связь: accident ↔ vehicle (многие-ко-многим)
+
+Индексы:
+CREATE INDEX idx_link_acc_vehicle_acc ON datavault.link_accident_vehicle(hub_accident_hashkey);
+CREATE INDEX idx_link_acc_vehicle_veh ON datavault.link_accident_vehicle(hub_vehicle_hashkey);
+
+#### link_region_accident
+
+```sql
+CREATE TABLE datavault.link_region_accident (
+link_hashkey VARCHAR(32) PRIMARY KEY,
+hub_region_hashkey VARCHAR(32),
+hub_accident_hashkey VARCHAR(32),
+load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+record_source VARCHAR(50),
+FOREIGN KEY (hub_region_hashkey) REFERENCES hub_region(hub_region_hashkey),
+FOREIGN KEY (hub_accident_hashkey) REFERENCES hub_accident(hub_accident_hashkey)
+);
+```
+
+Связь: region ↔ accident
+
+Индексы:
+CREATE INDEX idx_link_region_accident_reg ON datavault.link_region_accident(hub_region_hashkey);
+CREATE INDEX idx_link_region_accident_acc ON datavault.link_region_accident(hub_accident_hashkey);
+
+### 3.4. SAT таблицы (атрибуты)
+
+#### sat_accident_details
+
+```sql
+CREATE TABLE datavault.sat_accident_details (
+   sat_hashkey VARCHAR(32) PRIMARY KEY,
+   hub_accident_hashkey VARCHAR(32),
+   tags TEXT,
+   category VARCHAR(100),
+   county VARCHAR(100),
+   address TEXT,
+   longitude FLOAT,
+   latitude FLOAT,
+   nearby TEXT,
+   accident_datetime TIMESTAMP,
+   light VARCHAR(100),
+   weather VARCHAR(200),
+   road_conditions VARCHAR(200),
+   participants_count INTEGER,
+   participant_categories TEXT,
+   severity VARCHAR(50),
+   dead_count INTEGER,
+   injured_count INTEGER,
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50),
+   hashdiff VARCHAR(32),
+   FOREIGN KEY (hub_accident_hashkey) REFERENCES hub_accident(hub_accident_hashkey)
+);
+```
+
+Статистика: 1 616 059 записей
+
+Индексы:
+CREATE INDEX idx_sat_accident_hub ON datavault.sat_accident_details(hub_accident_hashkey);
+CREATE INDEX idx_sat_accident_datetime ON datavault.sat_accident_details(accident_datetime);
+
+#### sat_participant_details
+
+```sql
+CREATE TABLE datavault.sat_participant_details (
+sat_hashkey VARCHAR(32) PRIMARY KEY,
+hub_participant_hashkey VARCHAR(32),
+role VARCHAR(50),
+gender VARCHAR(10),
+violations TEXT,
+health_status VARCHAR(100),
+years_of_driving_experience INTEGER,
+load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+record_source VARCHAR(50),
+hashdiff VARCHAR(32),
+FOREIGN KEY (hub_participant_hashkey) REFERENCES hub_participant(hub_participant_hashkey)
+);
+```
+
+Статистика: 3 123 456 записей
+
+Индексы:
+CREATE INDEX idx_sat_participant_hub ON datavault.sat_participant_details(hub_participant_hashkey);
+CREATE INDEX idx_sat_participant_role ON datavault.sat_participant_details(role);
+
+#### sat_vehicle_details
+
+```sql
+CREATE TABLE datavault.sat_vehicle_details (
+   sat_hashkey VARCHAR(32) PRIMARY KEY,
+   hub_vehicle_hashkey VARCHAR(32),
+   category VARCHAR(50),
+   brand VARCHAR(100),
+   model VARCHAR(100),
+   color VARCHAR(30),
+   year INTEGER,
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50),
+   hashdiff VARCHAR(32),
+   FOREIGN KEY (hub_vehicle_hashkey) REFERENCES hub_vehicle(hub_vehicle_hashkey)
+);
+```
+
+Статистика: 2 653 755 записей
+
+Индексы:
+CREATE INDEX idx_sat_vehicle_hub ON datavault.sat_vehicle_details(hub_vehicle_hashkey);
+CREATE INDEX idx_sat_vehicle_brand ON datavault.sat_vehicle_details(brand);
+CREATE INDEX idx_sat_vehicle_year ON datavault.sat_vehicle_details(year);
 
 
