@@ -2,7 +2,6 @@
 for: 3transport-datavault-etl
 
 
-cat > docs/README.md << 'EOF'
 # 📚 Документация ETL-пайплайна транспортной аналитики
 
 **Автор:** Ilyaradaev  
