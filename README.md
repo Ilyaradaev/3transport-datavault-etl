@@ -90,8 +90,14 @@ for: 3transport-datavault-etl
 
 ## 2. АРХИТЕКТУРА РЕШЕНИЯ
 
-### 2.1. Общая архитектура системы
+### 2.1. Общая архитектура системы представлена на схеме «🚛 TRANSPORT ETL - DATA VAULT 2.0 ARCHITECTURE»
 
+<img width="1780" height="688" alt="image" src="https://github.com/user-attachments/assets/a697946d-4e81-40c1-8143-dc002b773127" />
+
+**🔗 Ссылка на схему в draw.io:**  
+[https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing](https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing)
+
+**Описание схемы:** Схема иллюстрирует полную архитектуру ETL-пайплайна, включая источники данных (3 CSV-файла), Apache Airflow DAG с 10 задачами, PostgreSQL с трехуровневой структурой (Staging → Data Vault → Data Marts) и Apache Superset для визуализации.
 
 Система построена по принципу **слоистой архитектуры** (Layered Architecture), что обеспечивает разделение ответственности и упрощает масштабирование.
 
@@ -116,13 +122,6 @@ for: 3transport-datavault-etl
 | **Visualization** | Apache Superset | Дашборды и аналитика |
 | **Management** | PgAdmin 4 | Управление PostgreSQL |
 | **Containerization** | Docker | Изоляция сервисов |
-
-### 2.3. Схема «🚛 TRANSPORT ETL - DATA VAULT 2.0 ARCHITECTURE»
-<img width="1780" height="688" alt="image" src="https://github.com/user-attachments/assets/a697946d-4e81-40c1-8143-dc002b773127" />
-**🔗 Ссылка на схему в draw.io:**  
-[https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing](https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing)
-
-**Описание схемы:** Схема иллюстрирует полную архитектуру ETL-пайплайна, включая источники данных (3 CSV-файла), Apache Airflow DAG с 10 задачами, PostgreSQL с трехуровневой структурой (Staging → Data Vault → Data Marts) и Apache Superset для визуализации.
 
 ---
 
