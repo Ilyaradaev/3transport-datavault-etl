@@ -196,4 +196,20 @@ CREATE TABLE datavault.hub_vehicle (
 Индексы:
 CREATE INDEX idx_hub_vehicle_bk ON datavault.hub_vehicle(vehicle_id);
 
+####hub_region
+
+```sql
+CREATE TABLE datavault.hub_region (
+   hub_region_hashkey VARCHAR(32) PRIMARY KEY,
+   region_name VARCHAR(100) NOT NULL UNIQUE,
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50)
+);
+```
+
+Статистика: 85+ записей
+
+Индексы:
+CREATE INDEX idx_hub_region_bk ON datavault.hub_region(region_name);
+
 
