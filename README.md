@@ -204,7 +204,7 @@ CREATE TABLE datavault.hub_vehicle (
 Индексы:
 CREATE INDEX idx_hub_vehicle_bk ON datavault.hub_vehicle(vehicle_id);
 
-#### 3.2.1.4 hub_region
+##### 3.2.1.4 hub_region
 
 ```sql
 CREATE TABLE datavault.hub_region (
@@ -220,7 +220,7 @@ CREATE TABLE datavault.hub_region (
 Индексы:
 CREATE INDEX idx_hub_region_bk ON datavault.hub_region(region_name);
 
-### 3.2.2 LINK таблицы (связи)
+#### 3.2.2 LINK таблицы (связи)
 ##### 3.2.2.1 link_accident_participant
 
 ```sql
@@ -281,7 +281,7 @@ FOREIGN KEY (hub_accident_hashkey) REFERENCES hub_accident(hub_accident_hashkey)
 CREATE INDEX idx_link_region_accident_reg ON datavault.link_region_accident(hub_region_hashkey);
 CREATE INDEX idx_link_region_accident_acc ON datavault.link_region_accident(hub_accident_hashkey);
 
-### 3.2.3 SAT таблицы (атрибуты)
+#### 3.2.3 SAT таблицы (атрибуты)
 
 ##### 3.2.3.1 sat_accident_details
 
@@ -370,19 +370,19 @@ CREATE INDEX idx_sat_vehicle_year ON datavault.sat_vehicle_details(year);
 #### 3.3. Правила хеширования и SCD Type 2
 Формулы хеширования для суррогатных ключей:
 
-#### -- HUB ключи
+##### -- HUB ключи
 hub_accident_hashkey = MD5(accident_id)
 hub_participant_hashkey = MD5(participant_id)
 hub_vehicle_hashkey = MD5(vehicle_id)
 hub_region_hashkey = MD5(region_name)
 
-#### -- SAT ключи
+##### -- SAT ключи
 sat_hashkey = MD5(hub_accident_hashkey || COALESCE(datetime, ''))
 
-#### -- LINK ключи
+##### -- LINK ключи
 link_hashkey = MD5(hub_accident_hashkey || hub_participant_hashkey)
 
-#### -- Hashdiff для отслеживания изменений
+##### -- Hashdiff для отслеживания изменений
 hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COALESCE(field3, ''))
 
 Принцип SCD Type 2:
