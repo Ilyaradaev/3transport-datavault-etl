@@ -157,7 +157,8 @@ CREATE TABLE datavault.hub_accident (
     accident_id INTEGER NOT NULL UNIQUE,
     load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     record_source VARCHAR(50)
-);'''
+);
+'''
 Статистика: 1 616 059 записей
 
 Индексы:
