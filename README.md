@@ -402,6 +402,18 @@ hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COA
 <img width="1267" height="820" alt="image" src="https://github.com/user-attachments/assets/839050ad-d70c-4e97-abca-ed7961eb66be" />
 
 Описание схемы: Диаграмма иллюстрирует физическое развертывание 9 Docker-контейнеров в среде Docker Host, их сетевое взаимодействие через транспортную сеть, а также монтирование томов для персистентности данных (PostgreSQL, Airflow, Superset) и внешних CSV-файлов. На схеме показаны связи между контейнерами, используемые порты и типы взаимодействия (HTTP, PostgreSQL, RESP, Internal RPC).
+      Как читать схему:
+      Администратор через браузер (порт 8080) подключается к Airflow Webserver для управления DAG
+      Webserver передаёт команды Scheduler
+      Scheduler отправляет задачи в Redis (очередь) и распределяет их между Worker
+      Worker:
+      Читает CSV-файлы через volume mount
+      Записывает данные в PostgreSQL DWH (порт 5432)
+      Обновляет метаданные в PostgreSQL Airflow
+      Аналитик через браузер (порт 8088) подключается к Superset для просмотра дашбордов
+      Superset читает данные из PostgreSQL DWH
+      Init запускается один раз при старте для инициализации метабазы
+      PgAdmin опционально используется для административного доступа к БД
 
 ### 4.2. Принципы контейнеризации
 
@@ -441,6 +453,49 @@ networks:
     driver: bridge
     name: transport_network
 ```
+### 4.5. Тома и монтирование данных
+Тома (Volumes) для персистентности данных:
+```yaml
+volumes:
+  postgres_data:        # Данные Data Warehouse
+  airflow_postgres_data: # Метаданные Airflow
+  superset_data:        # Данные Superset
+  pgadmin_data:         # Данные PgAdmin
+```
+
+### 4.6. Healthcheck и мониторинг
+
+Healthcheck (проверка здоровья) — это механизм Docker, который позволяет отслеживать состояние контейнеров и автоматически перезапускать их при сбоях.
+
+**Настройки healthcheck для PostgreSQL (Data Warehouse):**
+
+```yaml
+healthcheck: 
+  test: ["CMD-SHELL", "pg_isready -U etl_user3 -d dwh_etl_db"] # Команда проверки готовности PostgreSQL
+  interval: 10s #Интервал между проверками
+  timeout: 5s #Таймаут выполнения проверки
+  retries: 5 #Количество попыток до признания контейнера unhealthy
+  start_period: 30s # Время, после которого начинаются проверки
+```
+
+### Настройки healthcheck для Airflow Webserver
+
+Healthcheck для Airflow Webserver позволяет отслеживать состояние веб-интерфейса и автоматически перезапускать контейнер при обнаружении проблем. Это критически важно для production-среды, так как обеспечивает самовосстановление системы.
+
+**Конфигурация healthcheck в docker-compose.yml:**
+
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "--fail", "http://localhost:8080/health"] # Команда проверки: отправка HTTP-запроса к эндпоинту /health на порт 8080
+  interval: 30s # Интервал между проверками (каждые 30 секунд)
+  timeout: 10s # 	Максимальное время ожидания ответа на запрос
+  retries: 5 # Количество неудачных попыток до признания контейнера unhealthy
+  start_period: 60s # Время ожидания перед началом первых проверок (60 секунд на запуск)
+```
+
+
+
+
 
 
 
