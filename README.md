@@ -1,6 +1,6 @@
 # 3transport-datavault-etl
 for: 3transport-datavault-etl
-# 📚 КУРСОВАЯ РАБОТА (ПРОЕКТ)
+# 📚 ВЫПУСКНАЯ КВАЛИФИКАЦИОННАЯ РАБОТА
 
 ## по дисциплине «Data Architecture»
 
