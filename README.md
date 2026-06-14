@@ -166,12 +166,12 @@ CREATE INDEX idx_hub_accident_bk ON datavault.hub_accident(accident_id);
 
 #### hub_participant
 
-```SQL-код:
+```sql
 CREATE TABLE datavault.hub_participant (
-hub_participant_hashkey VARCHAR(32) PRIMARY KEY,
-participant_id VARCHAR(50) NOT NULL UNIQUE,
-load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-record_source VARCHAR(50)
+   hub_participant_hashkey VARCHAR(32) PRIMARY KEY,
+   participant_id VARCHAR(50) NOT NULL UNIQUE,
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50)
 );
 ```
 
