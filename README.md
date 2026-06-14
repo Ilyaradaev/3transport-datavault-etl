@@ -394,3 +394,47 @@ hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COA
 
 Ссылка на схему в draw.io:
 https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing
+
+## 4. Docker КОНТЕЙНЕРИЗАЦИЯ
+
+### 4.1. Принципы контейнеризации
+
+Контейнеризация — это метод виртуализации на уровне операционной системы, который позволяет запускать приложения в изолированных средах — контейнерах. Каждый контейнер включает в себя приложение и все его зависимости (библиотеки, конфигурации), но использует ядро хостовой ОС.
+
+**Преимущества контейнеризации для данного проекта:**
+
+| Преимущество | Описание |
+|--------------|----------|
+| Изоляция | Каждый сервис работает в своем контейнере, не влияя на другие |
+| Портативность | Запуск на любой ОС с Docker (Windows, macOS, Linux) |
+| Воспроизводимость | Одинаковое окружение на всех этапах (разработка, тестирование, производство) |
+| Масштабируемость | Легкое увеличение количества экземпляров сервисов |
+| Управляемость | Централизованное управление через docker-compose |
+
+---
+
+### 4.2. Список контейнеров
+
+| № | Контейнер | Образ | Порты | Назначение |
+|---|-----------|-------|-------|------------|
+| 1 | transport_postgres | postgres:15 | 5432:5432 | Data Warehouse (DWH) |
+| 2 | airflow_postgres | postgres:13 | - | Метаданные Airflow |
+| 3 | transport_redis | redis:7-alpine | 6379:6379 | Брокер сообщений |
+| 4 | transport_airflow_webserver | apache/airflow:2.7.1 | 8080:8080 | Web UI Airflow |
+| 5 | transport_airflow_scheduler | apache/airflow:2.7.1 | - | Планировщик задач |
+| 6 | transport_airflow_worker | apache/airflow:2.7.1 | - | Исполнитель задач ETL |
+| 7 | transport_airflow_init | apache/airflow:2.7.1 | - | Инициализация БД (одноразовый) |
+| 8 | transport_superset | apache/superset:4.0.0 | 8088:8088 | Визуализация данных |
+| 9 | transport_pgadmin | dpage/pgadmin4:latest | 5050:80 | Управление PostgreSQL |
+
+---
+
+### 4.3. Конфигурация сети
+
+**Docker Compose network:**
+
+```yaml
+networks:
+  transport_network:
+    driver: bridge
+    name: transport_network
