@@ -11,166 +11,106 @@ for: 3transport-datavault-etl
 
 ---
 
+# 📄 Документация к заданию №1: ETL-пайплайн транспортной аналитики (Data Vault)
+
+**Аспирант:** [Ваше ФИО]  
+**Группа:** [Ваша группа]  
+**Дисциплина:** Data Architecture  
+**Репозиторий:** `3transport-datavault-etl`  
+**Дата:** 14 июня 2024 г.
+
+---
+
 ## 📑 Оглавление
 
 1. [Цели и задачи работы](#1-цели-и-задачи-работы)
 2. [Архитектура решения](#2-архитектура-решения)
-3. [Data Vault модель](#3-data-vault-модель)
-4. [ETL пайплайн](#4-etl-пайплайн)
+   - 2.1. [Диаграмма компонентов и развертывания (UML Deployment)](#21-диаграмма-компонентов-и-развертывания-uml-deployment)
+   - 2.2. [Схема потоков данных (Data Flow Diagram - DFD)](#22-схема-потоков-данных-data-flow-diagram-dfd)
+3. [Модель данных Data Vault (UML Class Diagram)](#3-модель-данных-data-vault-uml-class-diagram)
+4. [Детали ETL-пайплайна](#4-детали-etl-пайплайна)
+   - 4.1. [Диаграмма последовательности (Sequence Diagram)](#41-диаграмма-последовательности-sequence-diagram)
+   - 4.2. [Диаграмма активности DAG (Activity Diagram)](#42-диаграмма-активности-dag-activity-diagram)
 5. [Оркестрация Apache Airflow](#5-оркестрация-apache-airflow)
 6. [Docker контейнеризация](#6-docker-контейнеризация)
-7. [Результаты выполнения](#7-результаты-выполнения)
+7. [Результаты выполнения и тест-кейсы](#7-результаты-выполнения-и-тест-кейсы)
 8. [Заключение](#8-заключение)
 
 ---
 
-# 📚 1. ЦЕЛИ И ЗАДАЧИ РАБОТЫ
-## 1. ВВЕДЕНИЕ
-### 1.1. Актуальность проблемы
-В современном мире дорожно-транспортные происшествия (ДТП) представляют собой одну из наиболее острых социально-экономических проблем. По данным статистики, ежегодно в мире в результате ДТП погибает более 1,3 миллиона человек и около 50 миллионов получают травмы различной степени тяжести. Экономический ущерб от ДТП составляет около 3% от мирового ВВП.
-
-**Ключевые проблемы, решаемые в работе:**
-
-| Проблема | Описание |
-|----------|----------|
-| **Разрозненность данных** | Информация о ДТП хранится в различных форматах и источниках |
-| **Отсутствие стандартизации** | Данные не приведены к единому формату и структуре |
-| **Сложность анализа** | Объемы данных достигают миллиардов записей, что затрудняет ручной анализ |
-| **Отсутствие историчности** | Невозможно отследить изменения данных во времени |
-| **Низкая производительность** | Традиционные СУБД не справляются с нагрузкой при анализе |
-
-### 1.2. Актуальность темы
-
-**Для науки и практики:**
-- Разработка эффективных ETL-пайплайнов для больших данных
-- Внедрение Data Vault архитектуры в аналитические системы
-- Автоматизация процессов обработки данных о ДТП
-- Создание основы для предиктивной аналитики и ML-моделей
-
-**Для общества:**
-- Повышение безопасности дорожного движения
-- Выявление опасных участков дорог
-- Анализ факторов, влияющих на аварийность
-- Обоснованное принятие управленческих решений
-
----
-
-## 2. ЦЕЛЬ РАБОТЫ
-
-### 2.1. Основная цель
-
-**Разработать, реализовать и документировать ETL-пайплайн для автоматизированного сбора, обработки и загрузки данных о дорожно-транспортных происшествиях, участниках и транспортных средствах в базу данных, построенную по принципу Data Vault, с обеспечением возможностей оркестрации процессов в Apache Airflow и визуализации результатов в Apache Superset.**
-
-### 2.2. Ключевые аспекты цели
-
----
-
-```mermaid
-graph TD
-    A[Цель работы] --> B[Сбор данных]
-    A --> C[Обработка данных]
-    A --> D[Хранение данных]
-    A --> E[Оркестрация]
-    A --> F[Визуализация]
-    
-    B --> B1[CSV файлы 3 источника]
-    B --> B2[Объем 2.36 GB]
-    B --> B3[7.4 млн записей]
-    
-    C --> C1[Удаление дубликатов]
-    C --> C2[Замена пропусков]
-    C --> C3[Приведение типов]
-    
-    D --> D1[Data Vault архитектура]
-    D --> D2[HUB LINK SAT]
-    D --> D3[PostgreSQL 15]
-    
-    E --> E1[Apache Airflow]
-    E --> E2[10 задач в DAG]
-    E --> E3[Планирование daily]
-    
-    F --> F1[Apache Superset]
-    F --> F2[4 витрины данных]
-    F --> F3[Интерактивные дашборды]
-
-
-
 ## 1. Цели и задачи работы
 
 ### 1.1. Актуальность
-
-Анализ дорожно-транспортных происшествий является критически важной задачей для повышения безопасности дорожного движения.
+Обработка и анализ больших массивов данных о ДТП критически важна для выявления аварийно-опасных участков, анализа причинности и принятия обоснованных управленческих решений.
 
 ### 1.2. Цель работы
+Разработать, реализовать и документировать отказоустойчивый ETL-пайплайн для автоматизированного сбора, очистки, трансформации и загрузки данных о ДТП в базу данных, спроектированную по **методологии Data Vault**, с использованием Apache Airflow и визуализацией в Apache Superset.
 
-Разработать ETL-пайплайн для сбора, обработки и загрузки данных о ДТП в базу данных Data Vault с визуализацией в Superset.
-
-### 1.3. Исходные данные
-
-| Файл | Размер | Количество записей | Атрибутов |
-|------|--------|-------------------|-----------|
-| accidents.csv | 1.07 GB | 1,616,059 | 18 |
-| participants.csv | 994 MB | 3,123,456 | 8 |
-| vehicles.csv | 296 MB | 2,653,755 | 7 |
-| **ИТОГО** | **2.36 GB** | **7,393,270** | **33** |
+### 1.3. Основные задачи (выполнены)
+1. Анализ 3 CSV-файлов (2.36 GB, 7.4 млн записей).
+2. Проектирование Data Vault: 4 Hub, 3 Link, 3 Satellite.
+3. Разработка ETL на Python (Pandas): удаление дубликатов, замена NaN, чанковая загрузка.
+4. Оркестрация в Airflow: DAG из 10 задач.
+5. Контейнеризация: 8 Docker-контейнеров.
+6. Визуализация: 4 дашборда в Superset.
+7. Полное документирование (UML + Markdown).
 
 ---
 
 ## 2. Архитектура решения
 
-### 2.1. Общая архитектура
+### 2.1. Диаграмма компонентов и развертывания (UML Deployment)
 
-Система построена по принципу слоистой архитектуры:
+**🔗 Ссылка на draw.io (Deployment Diagram):**  
+[https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/deployment-diagram.drawio](https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/deployment-diagram.drawio)
 
-1. **Уровень источников данных** - CSV файлы
-2. **Уровень оркестрации** - Apache Airflow
-3. **Уровень обработки** - Python ETL скрипты
-4. **Уровень хранения** - PostgreSQL Data Vault
-5. **Уровень визуализации** - Apache Superset
-
-### 2.2. Схемы в draw.io
-
-| Диаграмма | Ссылка |
-|-----------|--------|
-| DFD диаграмма | [https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/dfd-diagram.drawio](https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/dfd-diagram.drawio) |
-| Контейнерная диаграмма | [https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/container-diagram.drawio](https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/container-diagram.drawio) |
-| Data Vault Class | [https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/datavault-class-diagram.drawio](https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/datavault-class-diagram.drawio) |
-| Sequence диаграмма | [https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/sequence-diagram.drawio](https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/sequence-diagram.drawio) |
+**Описание:** Физическое развертывание в Docker, логические связи компонентов.
 
 ---
 
-## 3. Data Vault модель
+### 2.2. Схема потоков данных (Data Flow Diagram - DFD)
 
-### 3.1. HUB таблицы
-
-| HUB таблица | Бизнес-ключ | Количество записей |
-|-------------|-------------|-------------------|
-| hub_accident | accident_id | 1,616,059 |
-| hub_participant | participant_id | 3,123,456 |
-| hub_vehicle | vehicle_id | 2,653,755 |
-| hub_region | region_name | 85+ |
-
-### 3.2. LINK таблицы
-
-| LINK таблица | Связь |
-|--------------|-------|
-| link_accident_participant | accident ↔ participant |
-| link_accident_vehicle | accident ↔ vehicle |
-| link_region_accident | region ↔ accident |
-
-### 3.3. SAT таблицы
-
-| SAT таблица | Основные атрибуты |
-|-------------|-------------------|
-| sat_accident_details | tags, category, datetime, light, severity, dead_count, injured_count |
-| sat_participant_details | role, gender, violations, health_status, experience |
-| sat_vehicle_details | category, brand, model, color, year |
+**🔗 Ссылка на draw.io (DFD):**  
+[https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/dfd-diagram.drawio](https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/dfd-diagram.drawio)
 
 ---
 
-## 4. ETL пайплайн
+## 3. Модель данных Data Vault (UML Class Diagram)
 
-### 4.1. Процесс Extract
+**🔗 Ссылка на draw.io (Data Vault Class Diagram):**  
+[https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/datavault-class-diagram.drawio](https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/datavault-class-diagram.drawio)
 
-```python
-df = pd.read_csv(file_path, sep=';', encoding='utf-8', low_memory=False)
+**Структура Data Vault:**
+- **HUB таблицы (4):** hub_accident, hub_participant, hub_vehicle, hub_region
+- **LINK таблицы (3):** link_accident_participant, link_accident_vehicle, link_region_accident
+- **SAT таблицы (3):** sat_accident_details, sat_participant_details, sat_vehicle_details
+
+---
+
+## 4. Детали ETL-пайплайна
+
+### 4.1. Диаграмма последовательности (Sequence Diagram)
+
+**🔗 Ссылка на draw.io (Sequence Diagram):**  
+[https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/sequence-diagram.drawio](https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/sequence-diagram.drawio)
+
+---
+
+### 4.2. Диаграмма активности DAG (Activity Diagram)
+
+**🔗 Ссылка на draw.io (Activity Diagram):**  
+[https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/activity-diagram.drawio](https://app.diagrams.net/?lightbox=1&edit=_blank#Uhttps://raw.githubusercontent.com/Ilyaradaev/3transport-datavault-etl/main/docs/diagrams/activity-diagram.drawio)
+
+---
+
+## 5. Оркестрация Apache Airflow
+
+**Имя DAG:** `transport_full_etl`  
+**Расписание:** `@daily`  
+**Количество задач:** 10
+
+**Граф зависимостей:**
+```text
+start → load_config → extract_and_stage → create_datavault → load_hubs → load_sats → load_links → create_marts → validate_quality → end
+
+
