@@ -359,4 +359,38 @@ CREATE INDEX idx_sat_vehicle_hub ON datavault.sat_vehicle_details(hub_vehicle_ha
 CREATE INDEX idx_sat_vehicle_brand ON datavault.sat_vehicle_details(brand);
 CREATE INDEX idx_sat_vehicle_year ON datavault.sat_vehicle_details(year);
 
+#### 3.5. Правила хеширования и SCD Type 2
+Формулы хеширования для суррогатных ключей:
 
+#### -- HUB ключи
+hub_accident_hashkey = MD5(accident_id)
+hub_participant_hashkey = MD5(participant_id)
+hub_vehicle_hashkey = MD5(vehicle_id)
+hub_region_hashkey = MD5(region_name)
+
+#### -- SAT ключи
+sat_hashkey = MD5(hub_accident_hashkey || COALESCE(datetime, ''))
+
+#### -- LINK ключи
+link_hashkey = MD5(hub_accident_hashkey || hub_participant_hashkey)
+
+#### -- Hashdiff для отслеживания изменений
+hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COALESCE(field3, ''))
+
+Принцип SCD Type 2:
+
+Новая запись: INSERT в SAT с новым sat_hashkey
+
+Изменение атрибутов: INSERT новой версии записи (старая остается)
+
+Запрос актуальных данных: SELECT * FROM sat WHERE hashdiff = current_hash
+
+### 3.6. Схема «DATA VAULT 2.0 - CLASS DIAGRAM (UML Notation)»
+
+<img width="1163" height="777" alt="image" src="https://github.com/user-attachments/assets/8a0e7c5e-dafe-49c4-a762-8b2394a6b039" />
+
+
+Описание схемы: UML Class Diagram для Data Vault 2.0 модели, включающий 4 HUB-класса, 3 LINK-класса и 3 SAT-класса с полными наборами атрибутов, типами ключей (PK, FK, UK) и ассоциациями между классами.
+
+Ссылка на схему в draw.io:
+https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing
