@@ -394,6 +394,8 @@ hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COA
 Запрос актуальных данных: SELECT * FROM sat WHERE hashdiff = current_hash
 
 
+---
+
 ## 4. Docker КОНТЕЙНЕРИЗАЦИЯ
 ### 4.1. Схема взаимодействия контейнеров:
 
