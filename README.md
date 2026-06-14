@@ -503,9 +503,82 @@ healthcheck:
   start_period: 60s # Время ожидания перед началом первых проверок (60 секунд на запуск)
 ```
 
+--- 
+
+## 5. ETL ПАЙПЛАЙН
+
+### 5.1. Общая структура ETL процесса
+
+ETL (Extract, Transform, Load) — это процесс извлечения данных из источников, их трансформации (очистки, преобразования) и загрузки в целевое хранилище данных. В данном проекте ETL-пайплайн реализован на языке Python с использованием библиотеки Pandas.
+
+**Схема ETL процесса:**
+
+<img width="1780" height="688" alt="image" src="https://github.com/user-attachments/assets/a697946d-4e81-40c1-8143-dc002b773127" />
+
+
+**Роли компонентов ETL:**
+
+| Компонент | Технология | Функция |
+|-----------|------------|---------|
+| **Extract** | pandas.read_csv() | Чтение CSV-файлов с разделителем `;` |
+| **Transform** | pandas (drop_duplicates, replace) | Очистка данных от дубликатов и пропусков |
+| **Load** | pandas.to_sql() | Запись данных в PostgreSQL чанками |
+
+---
+
+### 5.2. Процесс Extract (Извлечение данных)
+
+Извлечение данных происходит из трёх CSV-файлов, расположенных на хостовой машине. Файлы монтируются в контейнер Airflow через Docker volume.
+
+**Источники данных:**
+
+| Файл | Размер | Количество записей | Разделитель | Кодировка |
+|------|--------|-------------------|-------------|-----------|
+| `accidents_all_regions_126_v20260501.csv` | 1.07 GB | 1,616,059 | `;` | UTF-8 |
+| `participants_all_regions_126_v20260501.csv` | 994 MB | 3,123,456 | `;` | UTF-8 |
+| `vehicles_all_regions_126_v20260501.csv` | 296 MB | 2,653,755 | `;` | UTF-8 |
+
+**Код извлечения данных:**
+
+```python
+def extract_and_stage(**context):
+    config = context['ti'].xcom_pull(key='config', task_ids='load_config')
+    hook = PostgresHook(postgres_conn_id='postgres_dwh')
+    engine = hook.get_sqlalchemy_engine()
+    
+    for dataset in config['datasets']:
+        file_path = os.path.join(config['source_path'], dataset['filename'])
+        table_name = f"raw_{dataset['name']}"
+        
+        if not os.path.exists(file_path):
+            logger.error(f"Файл не найден: {file_path}")
+            raise FileNotFoundError(f"Файл не найден: {file_path}")
+        
+        logger.info(f"Обработка файла: {dataset['name']} ({dataset['filename']})")
+        
+        # Чтение CSV 
+        df = pd.read_csv(file_path, sep=';', encoding='utf-8', low_memory=False)
+        logger.info(f"Загружено {len(df):,} записей из {dataset['name']}")
+
+
+### 5.3. Процесс Transform (Трансформация данных)
+Трансформация данных включает очистку от дубликатов, замену пропущенных значений и приведение типов данных.
+
+```
+# Удаление дубликатов
+before = len(df)
+df = df.drop_duplicates()
+logger.info(f"Удалено дубликатов: {before - len(df):,}")
+
+```
+
+```
+# Замена пропущенных значений на None
+df = df.replace({np.nan: None, '': None, 'NaN': None})
+```
 
 
 
-
+![Uploading image.png…]()
 
 
