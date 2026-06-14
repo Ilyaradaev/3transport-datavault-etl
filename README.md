@@ -182,13 +182,14 @@ CREATE INDEX idx_hub_participant_bk ON datavault.hub_participant(participant_id)
 
 #### hub_vehicle
 
-```SQL-код:
+```sql
 CREATE TABLE datavault.hub_vehicle (
-hub_vehicle_hashkey VARCHAR(32) PRIMARY KEY,
-vehicle_id VARCHAR(50) NOT NULL UNIQUE,
-load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-record_source VARCHAR(50)
-);```
+   hub_vehicle_hashkey VARCHAR(32) PRIMARY KEY,
+   vehicle_id VARCHAR(50) NOT NULL UNIQUE,
+   load_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   record_source VARCHAR(50)
+);
+```
 
 Статистика: 2 653 755 записей
 
