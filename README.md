@@ -385,7 +385,7 @@ hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COA
 
 Запрос актуальных данных: SELECT * FROM sat WHERE hashdiff = current_hash
 
-### 3.6. Схема «DATA VAULT 2.0 - CLASS DIAGRAM (UML Notation)»
+### 3.6. Схема DATA VAULT 2.0
 
 <img width="1163" height="777" alt="image" src="https://github.com/user-attachments/assets/8a0e7c5e-dafe-49c4-a762-8b2394a6b039" />
 
