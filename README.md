@@ -396,8 +396,13 @@ hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COA
 https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=sharing
 
 ## 4. Docker КОНТЕЙНЕРИЗАЦИЯ
+### 4.1. Схема взаимодействия контейнеров:
 
-### 4.1. Принципы контейнеризации
+<img width="1267" height="820" alt="image" src="https://github.com/user-attachments/assets/839050ad-d70c-4e97-abca-ed7961eb66be" />
+
+Описание схемы: Диаграмма иллюстрирует физическое развертывание 9 Docker-контейнеров в среде Docker Host, их сетевое взаимодействие через транспортную сеть, а также монтирование томов для персистентности данных (PostgreSQL, Airflow, Superset) и внешних CSV-файлов. На схеме показаны связи между контейнерами, используемые порты и типы взаимодействия (HTTP, PostgreSQL, RESP, Internal RPC).
+
+### 4.2. Принципы контейнеризации
 
 Контейнеризация — это метод виртуализации на уровне операционной системы, который позволяет запускать приложения в изолированных средах — контейнерах. Каждый контейнер включает в себя приложение и все его зависимости (библиотеки, конфигурации), но использует ядро хостовой ОС.
 
@@ -411,9 +416,7 @@ https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=shari
 | Масштабируемость | Легкое увеличение количества экземпляров сервисов |
 | Управляемость | Централизованное управление через docker-compose |
 
----
-
-### 4.2. Список контейнеров
+### 4.3. Список контейнеров
 
 | № | Контейнер | Образ | Порты | Назначение |
 |---|-----------|-------|-------|------------|
@@ -427,9 +430,7 @@ https://drive.google.com/file/d/1BFmK4awHHs3aTmmCiebVUvu1ovcYRadZ/view?usp=shari
 | 8 | transport_superset | apache/superset:4.0.0 | 8088:8088 | Визуализация данных |
 | 9 | transport_pgadmin | dpage/pgadmin4:latest | 5050:80 | Управление PostgreSQL |
 
----
-
-### 4.3. Конфигурация сети
+### 4.4. Конфигурация сети
 
 **Docker Compose network:**
 
@@ -438,3 +439,7 @@ networks:
   transport_network:
     driver: bridge
     name: transport_network
+```
+
+
+
