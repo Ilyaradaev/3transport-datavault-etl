@@ -451,7 +451,7 @@ hashdiff = MD5(COALESCE(field1, '') || '|' || COALESCE(field2, '') || '|' || COA
 | 6 | transport_airflow_worker | apache/airflow:2.7.1 | - | Исполнитель задач ETL |
 | 7 | transport_airflow_init | apache/airflow:2.7.1 | - | Инициализация БД (одноразовый) |
 | 8 | transport_superset | apache/superset:4.0.0 | 8088:8088 | Визуализация данных |
-| 9 | transport_pgadmin | dpage/pgadmin4:latest | 5050:80 | Управление PostgreSQL |
+| 9 | transport_pgadmin | dpage/pgadmin4:latest | 5050:80 | Управление PostgreSQL | 
 
 ### 4.4. Конфигурация сети
 
